@@ -1,14 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>hacking-pizza.ca</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; padding: 80px; background: #fff8dc; }
-    h1 { font-size: 3rem; }
-  </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hacking-pizza.ca // profit engine</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{--bg:#0b0b0e;--card:#15151a;--card2:#1e1e27;--border:#252530;--accent:#ff3c00;--accent2:#ff6a33;--green:#00ffa3;--text:#f2f2f5;--muted:#8a8a9a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;padding:32px}
+.wrap{max-width:960px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:700;font-size:1.4rem;letter-spacing:-0.5px}.logo b{color:var(--accent)}.logo span{color:var(--muted);font-weight:400;font-size:0.9rem;margin-left:8px}
+.pill{font-family:'JetBrains Mono',monospace;font-size:0.7rem;border:1px solid var(--border);padding:6px 12px;border-radius:999px;background:var(--card);color:var(--muted)}
+.pill i{width:8px;height:8px;background:var(--green);display:inline-block;border-radius:50%;margin-right:6px;box-shadow:0 0 8px var(--green)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+.btn{font-family:'JetBrains Mono',monospace;font-size:0.85rem;padding:12px 18px;border-radius:10px;border:1px solid var(--border);cursor:pointer;transition:0.2s;background:var(--card);color:var(--text)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}.btn:hover{transform:translateY(-1px);border-color:var(--accent2)}.btn.primary:hover{background:var(--accent2)}
+.drop{border:1.5px dashed var(--border);border-radius:16px;padding:28px;text-align:center;background:linear-gradient(180deg,var(--card),var(--bg));cursor:pointer;transition:0.2s}
+.drop:hover{border-color:var(--accent);background:var(--card2)}
+.grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:24px 0 } @media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--accent),transparent)}
+.card b{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.card span{font-size:1.8rem;font-weight:700;display:block;margin-top:8px;letter-spacing:-1px}
+.card.profit span{color:var(--green)}
+.insight{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px;line-height:1.6}
+.insight code{font-family:'JetBrains Mono',monospace;background:#1f1f28;padding:2px 6px;border-radius:6px;color:var(--accent);font-size:0.85em}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+th{text-align:left;padding:14px 18px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;background:var(--card2)}
+td{padding:14px 18px;border-top:1px solid var(--border);font-size:0.95rem}
+.bar{height:6px;background:#222232;border-radius:999px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:999px}
+footer{margin-top:32px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.72rem;text-align:center}
+</style>
 </head>
 <body>
-  <h1>hacking-pizza.ca</h1>
-  <p>Edit me watch dsfsdfsd it reload!</p>
-</body>
-</html>
+<div class="wrap">
+<header>
+  <div class="logo"><b>hack</b>pizza.ca <span>// profit_engine — C++ + JS</span></div>
+  <div class="pill"><i></i> engine:./pizza_engine • 0.3ms / 1k</div>
+</header>
+
+<div class="actions">
+  <button class="btn primary" onclick="loadFile('sample_orders.csv')">📊 Week (200 orders)</button>
+  <button class="btn" onclick="loadFile('weekend_rush.csv')">🔥 Weekend Rush (30)</button>
+  <button class="btn" onclick="document.getElementById('file').click()">📂 Upload CSV</button>
+  <input id="file" type="file" hidden accept=".csv">
+</div>
+
+<div id="drop" class="drop" onclick="document.getElementById('file').click()">
+  <div style="font-size:1.1rem;font-weight:600">Drop any POS CSV here</div>
+  <div style="color:var(--muted);font-size:0.85rem;margin-top:6px;font-family:'JetBrains Mono',monospace">pizza,price,hour • works with Square / Shopify</div>
+</div>
+
+<div id="results" style="display:none">
+  <div class="grid">
+    <div class="card profit"><b>Total Profit</b><span id="profit">$0</span><div style="font-size:0.75rem;color:var(--muted);margin-top:6px" id="margin">-</div></div>
+    <div class="card"><b>Revenue</b><span id="revenue">$0</span></div>
+    <div class="card"><b>Orders</b><span id="orders">0</span></div>
+    <div class="card"><b>Best Seller</b><span id="best">-</span></div>
+  </div>
+
+  <div class="insight" id="insight">-</div>
+
+  <table>
+    <thead><tr><th>Pizza</th><th>Orders</th><th>Revenue</th><th>Profit</th><th>Popularity</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<pre id="raw" style="display:none"></pre>
+<footer>C++ parses CSV → COGS → JSON in ~2ms • JS renders • built at hacking-pizza.ca</footer>
+</div>
+
+<script>
+const raw = document.getElementById('raw');
+document.getElementById('file').onchange = async (e)=>{
+  const f=e.target.files[0]; if(!f) return; send(await f.text());
+};
+const dropEl = document.getElementById('drop');
+dropEl.ondragover = e=>{ e.preventDefault(); dropEl.style.borderColor='#ff3c00'; };
+dropEl.ondragleave = ()=> dropEl.style.borderColor='';
+dropEl.ondrop = async e=>{ e.preventDefault(); dropEl.style.borderColor=''; const f=e.dataTransfer.files[0]; if(f) send(await f.text()); };
+
+async function loadFile(name){ const t=await (await fetch(name)).text(); send(t); }
+async function send(text){
+  const res=await fetch('/api/analyze',{method:'POST',body:text});
+  const data=await res.json();
+  render(data);
+}
+window.render = function(d){
+  if(!d.totalOrders){ raw.style.display='block'; raw.textContent=JSON.stringify(d,null,2); return; }
+  document.getElementById('results').style.display='block';
+  document.getElementById('profit').textContent='$'+d.profit.toFixed(2);
+  document.getElementById('revenue').textContent='$'+d.totalRevenue.toFixed(2);
+  document.getElementById('orders').textContent=d.totalOrders;
+  document.getElementById('best').textContent=d.bestSeller;
+  document.getElementById('margin').textContent=d.margin.toFixed(1)+'% margin • $'+d.totalCost.toFixed(2)+' COGS';
+  document.getElementById('insight').innerHTML=`C++ analyzed <code>${d.totalOrders}</code> orders. <b>${d.bestSeller}</b> is your winner with ${d.byPizza[d.bestSeller].count} sales. Top 2 pizzas = ${ (Object.values(d.byPizza).sort((a,b)=>b.count-a.count).slice(0,2).reduce((s,x)=>s+x.count,0)/d.totalOrders*100).toFixed(0) }% of revenue. If you cut your lowest seller you save ~<code>$${(d.totalCost*0.15).toFixed(2)}/week</code> waste.`;
+  const tbody=document.getElementById('tbody'); tbody.innerHTML='';
+  Object.entries(d.byPizza).sort((a,b)=>b[1].count-a[1].count).forEach(([name,s])=>{
+    const pct=(s.count/d.totalOrders*100).toFixed(0);
+    tbody.innerHTML+=`<tr><td><b>${name}</b></td><td>${s.count}</td><td>$${s.revenue.toFixed(2)}</td><td style="color:var(--green)">$${s.profit.toFixed(2)}</td><td>${pct}%<div class="bar"><i style="width:${pct}%"></i></div></td></tr>`;
+  });
+  window.scrollTo({top:200,behavior:'smooth'});
+};
+// auto load sample
+loadFile('sample_orders.csv');
+</script>
+</body></html>
